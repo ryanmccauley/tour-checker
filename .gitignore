@@ -1,0 +1,4 @@
+.idea/
+*.zip
+main
+go.sum

@@ -3,7 +3,7 @@ This was a test project to try out deploying AWS Lambda with cron tasks. This pr
 
 ## Building
 
-To deploy this to AWS Lambda, build this program:
+To deploy this to AWS Lambda, add the Discord Webhook URL environmental variable `WEBHOOK_URL` and build this program:
 
 ```
 GOARCH=amd64 GOOS=linux go build main.go

@@ -2,3 +2,4 @@
 *.zip
 main
 go.sum
+.env

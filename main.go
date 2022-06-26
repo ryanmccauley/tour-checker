@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/joho/godotenv"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 )
 
@@ -21,20 +23,28 @@ type CalendarResponse struct {
 
 func HandleRequest(ctx context.Context) error {
 	resp, err := http.Get(URL)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 
 	html, err := ioutil.ReadAll(resp.Body)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 
 	found := CalendarResponse{}
 	err = json.Unmarshal(html, &found)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 
 	for _, value := range found.Dates {
 		full, _ := strconv.Atoi(value[1])
 		if full == 0 {
 			err := SendWebhook(value[0])
-			if err != nil { return err }
+			if err != nil {
+				return err
+			}
 		}
 		fmt.Println(value)
 	}
@@ -47,13 +57,22 @@ type WebhookRequest struct {
 }
 
 func SendWebhook(day string) error {
-	url := "https://discord.com/api/webhooks/986032025213501481/c3f5dM-JjrwsBzfLjk_Cx7u7yR_Flm7YJN-SM5o9sA1Rh7b_j_5sq3m_8k9qosy2aJ8V"
+	url := os.Getenv("WEBHOOK_URL")
+	if len(url) == 0 {
+		panic("Cannot load environment variable `WEBHOOK_URL`")
+	}
 	payload, err := json.Marshal(WebhookRequest{Content: day + " is available. @everyone"})
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	_, err = http.Post(url, "application/json", bytes.NewBuffer(payload))
 	return err
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		panic(err)
+	}
 	lambda.Start(HandleRequest)
 }
